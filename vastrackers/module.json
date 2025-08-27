@@ -1,15 +1,13 @@
 {
   "id": "vastrackers",
-  "type": "module",
   "title": "VasTrackers",
-  "version": "0.0.2.1",
+  "version": "0.0.3",
   "url": "https://github.com/Tygra/VasTrackers",
   "manifest": "https://raw.githubusercontent.com/Tygra/VasTrackers/main/vastrackers/module.json",
-  "download": "https://github.com/Tygra/VasTrackers/releases/download/0.0.2.1/vastrackers.zip",
+  "download": "https://github.com/Tygra/VasTrackers/releases/download/0.0.3/vastrackers.zip",
   "esmodules": ["scripts/main.js"],
   "styles": ["styles/module.css"],
-  "templates": ["templates/panel.hbs"],
   "compatibility": { "minimum": "11", "verified": "13" },
   "authors": [{ "name": "Tygra" }],
-  "description": "Idő, Supply és Ship HP számlálók + lock."
+  "description": "Idő, Supply és Ship HP számlálók + lock, me méne?."
 }
