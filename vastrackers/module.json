@@ -3,7 +3,7 @@
   "title": "VasTrackers",
   "version": "0.0.1",
   "url": "https://github.com/Tygra/VasTrackers",
-  "manifest": "https://raw.githubusercontent.com/Tygra/VasTrackers/main/module.json",
+  "manifest": "https://raw.githubusercontent.com/Tygra/VasTrackers/main/vastrackers/module.json",
   "download": "https://github.com/Tygra/VasTrackers/releases/download/v0.0.1/vastrackers.zip",
   "esmodules": ["scripts/main.js"],
   "styles": ["styles/module.css"],
