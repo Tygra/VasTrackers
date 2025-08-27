@@ -1,5 +1,6 @@
 {
   "id": "vastrackers",
+  "type": "module",
   "title": "VasTrackers",
   "version": "0.0.2",
   "url": "https://github.com/Tygra/VasTrackers",
