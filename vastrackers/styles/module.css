@@ -1,0 +1,10 @@
+.vt-root { padding: 10px; }
+.vt-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.vt-title { font-weight:bold; }
+.vt-lock { border:0; background:transparent; cursor:pointer; }
+.vt-row { display:grid; grid-template-columns: 90px 1fr; align-items:center; gap:8px; margin:6px 0; }
+.vt-controls { display:flex; gap:6px; align-items:center; }
+.vt-controls button { width:28px; height:28px; }
+.vt-controls input { width:80px; text-align:center; }
+.vt-root.is-locked .vt-lock { color: var(--color-text-dark-secondary, #e74c3c); }
+.vt-lock-hint { margin-top:6px; font-size:12px; opacity:.8; }

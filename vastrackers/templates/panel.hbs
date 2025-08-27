@@ -1,0 +1,39 @@
+<div class="vt-root {{#if locked}}is-locked{{/if}}">
+  <div class="vt-header">
+    <div class="vt-title">VasTrackers</div>
+    <button class="vt-lock" data-action="toggle-lock" title="{{#if locked}}Unlock{{else}}Lock{{/if}}">
+      {{#if locked}}<i class="fas fa-lock"></i>{{else}}<i class="fas fa-lock-open"></i>{{/if}}
+    </button>
+  </div>
+
+  <div class="vt-row">
+    <label>Time</label>
+    <div class="vt-controls">
+      <button data-action="dec" data-key="time" {{#unless canEdit}}disabled{{/unless}}>-</button>
+      <input type="number" data-key="time" value="{{time}}" {{#unless canEdit}}disabled{{/unless}} />
+      <button data-action="inc" data-key="time" {{#unless canEdit}}disabled{{/unless}}>+</button>
+    </div>
+  </div>
+
+  <div class="vt-row">
+    <label>Supply</label>
+    <div class="vt-controls">
+      <button data-action="dec" data-key="supply" {{#unless canEdit}}disabled{{/unless}}>-</button>
+      <input type="number" data-key="supply" value="{{supply}}" {{#unless canEdit}}disabled{{/unless}} />
+      <button data-action="inc" data-key="supply" {{#unless canEdit}}disabled{{/unless}}>+</button>
+    </div>
+  </div>
+
+  <div class="vt-row">
+    <label>Ship HP</label>
+    <div class="vt-controls">
+      <button data-action="dec" data-key="shiphp" {{#unless canEdit}}disabled{{/unless}}>-</button>
+      <input type="number" data-key="shiphp" value="{{shiphp}}" {{#unless canEdit}}disabled{{/unless}} />
+      <button data-action="inc" data-key="shiphp" {{#unless canEdit}}disabled{{/unless}}>+</button>
+    </div>
+  </div>
+
+  {{#if locked}}
+    <div class="vt-lock-hint"><i class="fas fa-info-circle"></i> Locked: értékek nem módosíthatók.</div>
+  {{/if}}
+</div>
