@@ -1,3 +1,4 @@
+/* Target the entire application window */
 #vastrackers-app {
   background: rgba(0, 0, 0, 0.7) !important;
   border-radius: 8px !important;
@@ -26,51 +27,107 @@
   background: transparent;
   border-radius: 0;
 }
-.vt-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-.vt-title { font-weight:bold; color: white; }
-.vt-lock { border:0; background:transparent; cursor:pointer; color: white; }
-.vt-row { 
-  display:grid; 
-  grid-template-columns: 90px 1fr; 
-  align-items:center; 
-  gap:8px; 
-  margin:6px 0;
+
+.vt-header { 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  margin-bottom: 12px; 
 }
+
+.vt-header-controls {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  width: 100%;
+}
+
+.vt-lock, .vt-show-players { 
+  border: 0; 
+  background: rgba(255, 255, 255, 0.1); 
+  cursor: pointer; 
+  color: white; 
+  padding: 6px 8px;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+  font-size: 12px;
+  flex: 1;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vt-lock:hover, .vt-show-players:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.vt-row { 
+  display: grid; 
+  grid-template-columns: 90px 1fr; 
+  align-items: center; 
+  gap: 8px; 
+  margin: 6px 0;
+}
+
 .vt-row label { 
   color: white; 
   display: flex; 
   align-items: center; 
   gap: 6px;
 }
-.vt-controls { display:flex; gap:6px; align-items:center; }
+
+.vt-controls { 
+  display: flex; 
+  gap: 6px; 
+  align-items: center; 
+}
+
 .vt-controls button { 
-  width:28px; 
-  height:28px; 
+  width: 28px; 
+  height: 28px; 
   background: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
   border-radius: 4px;
   will-change: background;
 }
+
 .vt-controls button:hover {
   background: rgba(255, 255, 255, 0.3);
 }
+
 .vt-controls input { 
-  width:80px; 
-  text-align:center; 
+  width: 80px; 
+  text-align: center; 
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
   border-radius: 4px;
 }
-.vt-root.is-locked .vt-lock { color: var(--color-text-dark-secondary, #e74c3c); }
-.vt-lock-hint { 
-  margin-top:6px; 
-  font-size:12px; 
-  opacity:.8; 
-  color: white;
+
+.vt-root.is-locked .vt-lock { 
+  color: var(--color-text-dark-secondary, #e74c3c); 
 }
-i.vt-icon-t { font-style: normal; }
+
+.vt-footer-status {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  justify-content: center;
+}
+
+i.vt-icon-t { 
+  font-style: normal; 
+}
+
 i.vt-icon-t::before {
   content: "T";
   font-weight: 900;

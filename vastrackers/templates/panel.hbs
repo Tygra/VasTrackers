@@ -1,9 +1,15 @@
 <div class="vt-root {{#if locked}}is-locked{{/if}}">
   <div class="vt-header">
-    <div class="vt-title">VasTrackers</div>
-    <button class="vt-lock" data-action="toggle-lock" title="{{#if locked}}Unlock{{else}}Lock{{/if}}">
-      {{#if locked}}<i class="fas fa-lock"></i>{{else}}<i class="fas fa-lock-open"></i>{{/if}}
-    </button>
+    <div class="vt-header-controls">
+      {{#if isGM}}
+        <button class="vt-show-players" data-action="toggle-show-players" title="{{#if showToPlayers}}Hide from Players{{else}}Show to Players{{/if}}">
+          {{#if showToPlayers}}<i class="fas fa-eye"></i>{{else}}<i class="fas fa-eye-slash"></i>{{/if}}
+        </button>
+        <button class="vt-lock" data-action="toggle-lock" title="{{#if locked}}Unlock{{else}}Lock{{/if}}">
+          {{#if locked}}<i class="fas fa-lock"></i>{{else}}<i class="fas fa-lock-open"></i>{{/if}}
+        </button>
+      {{/if}}
+    </div>
   </div>
 
   <div class="vt-row">
@@ -33,7 +39,21 @@
     </div>
   </div>
 
-  {{#if locked}}
-    <div class="vt-lock-hint"><i class="fas fa-info-circle"></i> Locked: Cannot change values</div>
+  {{#if isGM}}
+    {{#if locked}}
+      <div class="vt-footer-status">
+        <i class="fas fa-lock"></i> Locked: Cannot change values
+      </div>
+    {{/if}}
+  {{/if}}
+
+  {{#if isGM}}
+    <div class="vt-footer-status">
+      {{#if showToPlayers}}
+        <i class="fas fa-users"></i> Visible to players
+      {{else}}
+        <i class="fas fa-user-slash"></i> Hidden from players
+      {{/if}}
+    </div>
   {{/if}}
 </div>

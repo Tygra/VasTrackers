@@ -1,10 +1,10 @@
 {
   "id": "vastrackers",
   "title": "VasTrackers",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "url": "https://github.com/Tygra/VasTrackers",
   "manifest": "https://raw.githubusercontent.com/Tygra/VasTrackers/main/vastrackers/module.json",
-  "download": "https://github.com/Tygra/VasTrackers/releases/download/0.0.3/vastrackers.zip",
+  "download": "https://github.com/Tygra/VasTrackers/releases/download/0.0.4/vastrackers.zip",
   "esmodules": ["scripts/main.js"],
   "styles": ["styles/module.css"],
   "compatibility": { "minimum": "11", "verified": "13" },
