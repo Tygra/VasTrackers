@@ -42,7 +42,7 @@
   width: 100%;
 }
 
-.vt-lock, .vt-show-players { 
+.vt-lock, .vt-show-players, .vt-options { 
   border: 0; 
   background: rgba(255, 255, 255, 0.1); 
   cursor: pointer; 
@@ -58,7 +58,7 @@
   justify-content: center;
 }
 
-.vt-lock:hover, .vt-show-players:hover {
+.vt-lock:hover, .vt-show-players:hover, .vt-options:hover {
   background: rgba(255, 255, 255, 0.2);
 }
 

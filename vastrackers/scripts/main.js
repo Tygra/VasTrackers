@@ -17,10 +17,36 @@ class VasTrackersApp extends Application {
   async getData() {
     const state = game.settings.get(MODULE_ID, SETTING_KEY) ?? {};
     console.log("[VasTrackers] getData - isGM:", game.user.isGM);
+    
+    // Initialize trackers array if it doesn't exist
+    if (!state.trackers) {
+      // Default trackers for backward compatibility
+      state.trackers = [
+        {
+          id: "time",
+          label: "Time",
+          icon: "fa-sun",
+          value: state.time ?? 0
+        },
+        {
+          id: "supply",
+          label: "Supply", 
+          icon: "fa-boxes",
+          value: state.supply ?? 0
+        },
+        {
+          id: "shiphp",
+          label: "Ship HP",
+          icon: "fa-ship",
+          value: state.shiphp ?? 0
+        }
+      ];
+      // Save the migrated structure
+      await game.settings.set(MODULE_ID, SETTING_KEY, state);
+    }
+    
     return {
-      time: state.time ?? 0,
-      supply: state.supply ?? 0,
-      shiphp: state.shiphp ?? 0,
+      trackers: state.trackers,
       locked: state.locked ?? false,
       showToPlayers: state.showToPlayers ?? false,
       isGM: game.user.isGM,
@@ -71,33 +97,261 @@ class VasTrackersApp extends Application {
       
       console.log("[VasTrackers] GM toggling player visibility to:", newShowToPlayers);
       
-      ui.notifications?.info(newShowToPlayers ? "Window shown to players" : "Window hidden from players");
+      ui.notifications?.info(newShowToPlayers ? "Tracker Window shown to players" : "Tracker Window hidden from players");
     });
 
+    // Open options menu (GM only)
+    html.find("[data-action='open-options']").on("click", async () => {
+      if (!game.user.isGM) return ui.notifications?.warn("Only the GM can access options.");
+      
+      const state = game.settings.get(MODULE_ID, SETTING_KEY) ?? {};
+      const trackers = state.trackers ?? [];
+      
+      // Build the HTML for each tracker
+      let trackersHtml = trackers.map((tracker, index) => `
+        <div class="tracker-config" data-tracker-index="${index}" style="border: 1px solid #ccc; padding: 10px; border-radius: 4px; margin-bottom: 10px; position: relative;">
+          <button type="button" class="remove-tracker" data-index="${index}" style="position: absolute; right: 5px; top: 5px; width: 24px; height: 24px; border-radius: 3px; background: #dc3545; color: white; border: none; cursor: pointer;" title="Remove this tracker">
+            <i class="fas fa-times"></i>
+          </button>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+            <div>
+              <label style="display: block; margin-bottom: 4px;">Label:</label>
+              <input type="text" name="label_${index}" value="${tracker.label}" style="width: 100%;">
+            </div>
+            <div>
+              <label style="display: block; margin-bottom: 4px;">Icon Class:</label>
+              <input type="text" name="icon_${index}" value="${tracker.icon}" style="width: 100%;">
+            </div>
+            <div>
+              <label style="display: block; margin-bottom: 4px;">Current Value:</label>
+              <input type="number" name="value_${index}" value="${tracker.value}" style="width: 100%;">
+            </div>
+          </div>
+        </div>
+      `).join('');
+      
+      // Create a dialog for options
+      new Dialog({
+        title: "Hex Tracker Options",
+        content: `
+          <form style="padding: 10px;">
+            <h3>Manage Trackers</h3>
+            <p style="font-size: 12px; opacity: 0.8; margin-bottom: 15px;">
+              Add, remove, or customize trackers. Icons use Font Awesome classes (e.g., fa-sun, fa-clock, fa-heart).
+            </p>
+            
+            <div id="trackers-list">
+              ${trackersHtml}
+            </div>
+            
+            <div style="margin-top: 15px; display: flex; gap: 10px;">
+              <button type="button" id="add-tracker" style="padding: 6px 12px; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                <i class="fas fa-plus"></i> Add New Tracker
+              </button>
+              <button type="button" id="reset-defaults" style="padding: 6px 12px; background: #6c757d; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                <i class="fas fa-undo"></i> Reset to Defaults
+              </button>
+            </div>
+            
+            <hr style="margin: 15px 0;">
+            
+            <p style="font-size: 11px; opacity: 0.7; text-align: center;">Changes will be saved when you click Save</p>
+          </form>
+        `,
+        buttons: {
+          save: {
+            label: "Save",
+            callback: async (html) => {
+              const form = html[0].querySelector("form");
+              const state = game.settings.get(MODULE_ID, SETTING_KEY) ?? {};
+              
+              // Collect all tracker data
+              const newTrackers = [];
+              const trackerConfigs = form.querySelectorAll('.tracker-config');
+              
+              trackerConfigs.forEach((config, index) => {
+                const label = form[`label_${index}`]?.value;
+                const icon = form[`icon_${index}`]?.value;
+                const value = parseInt(form[`value_${index}`]?.value) || 0;
+                
+                if (label) { // Only add if label exists
+                  // Generate ID from label if new tracker
+                  const id = state.trackers?.[index]?.id || label.toLowerCase().replace(/\s+/g, '_');
+                  newTrackers.push({ id, label, icon, value });
+                }
+              });
+              
+              // Save the new trackers array
+              await setState({ trackers: newTrackers });
+              ui.notifications?.info("Tracker configuration saved!");
+            }
+          },
+          cancel: {
+            label: "Cancel",
+            callback: () => {}
+          }
+        },
+        default: "save",
+        render: (html) => {
+          // Add tracker functionality
+          html.find("#add-tracker").on("click", () => {
+            const trackersList = html.find("#trackers-list");
+            const newIndex = trackersList.find('.tracker-config').length;
+            
+            const newTrackerHtml = `
+              <div class="tracker-config" data-tracker-index="${newIndex}" style="border: 1px solid #ccc; padding: 10px; border-radius: 4px; margin-bottom: 10px; position: relative;">
+                <button type="button" class="remove-tracker" data-index="${newIndex}" style="position: absolute; right: 5px; top: 5px; width: 24px; height: 24px; border-radius: 3px; background: #dc3545; color: white; border: none; cursor: pointer;" title="Remove this tracker">
+                  <i class="fas fa-times"></i>
+                </button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="display: block; margin-bottom: 4px;">Label:</label>
+                    <input type="text" name="label_${newIndex}" value="New Tracker" style="width: 100%;">
+                  </div>
+                  <div>
+                    <label style="display: block; margin-bottom: 4px;">Icon Class:</label>
+                    <input type="text" name="icon_${newIndex}" value="fa-star" style="width: 100%;">
+                  </div>
+                  <div>
+                    <label style="display: block; margin-bottom: 4px;">Current Value:</label>
+                    <input type="number" name="value_${newIndex}" value="0" style="width: 100%;">
+                  </div>
+                </div>
+              </div>
+            `;
+            
+            trackersList.append(newTrackerHtml);
+            
+            // Reattach remove handlers
+            attachRemoveHandlers(html);
+          });
+          
+          // Reset to defaults functionality
+          html.find("#reset-defaults").on("click", () => {
+            const defaultTrackers = `
+              <div class="tracker-config" data-tracker-index="0" style="border: 1px solid #ccc; padding: 10px; border-radius: 4px; margin-bottom: 10px; position: relative;">
+                <button type="button" class="remove-tracker" data-index="0" style="position: absolute; right: 5px; top: 5px; width: 24px; height: 24px; border-radius: 3px; background: #dc3545; color: white; border: none; cursor: pointer;" title="Remove this tracker">
+                  <i class="fas fa-times"></i>
+                </button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="display: block; margin-bottom: 4px;">Label:</label>
+                    <input type="text" name="label_0" value="Time" style="width: 100%;">
+                  </div>
+                  <div>
+                    <label style="display: block; margin-bottom: 4px;">Icon Class:</label>
+                    <input type="text" name="icon_0" value="fa-sun" style="width: 100%;">
+                  </div>
+                  <div>
+                    <label style="display: block; margin-bottom: 4px;">Current Value:</label>
+                    <input type="number" name="value_0" value="0" style="width: 100%;">
+                  </div>
+                </div>
+              </div>
+              <div class="tracker-config" data-tracker-index="1" style="border: 1px solid #ccc; padding: 10px; border-radius: 4px; margin-bottom: 10px; position: relative;">
+                <button type="button" class="remove-tracker" data-index="1" style="position: absolute; right: 5px; top: 5px; width: 24px; height: 24px; border-radius: 3px; background: #dc3545; color: white; border: none; cursor: pointer;" title="Remove this tracker">
+                  <i class="fas fa-times"></i>
+                </button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="display: block; margin-bottom: 4px;">Label:</label>
+                    <input type="text" name="label_1" value="Supply" style="width: 100%;">
+                  </div>
+                  <div>
+                    <label style="display: block; margin-bottom: 4px;">Icon Class:</label>
+                    <input type="text" name="icon_1" value="fa-boxes" style="width: 100%;">
+                  </div>
+                  <div>
+                    <label style="display: block; margin-bottom: 4px;">Current Value:</label>
+                    <input type="number" name="value_1" value="0" style="width: 100%;">
+                  </div>
+                </div>
+              </div>
+              <div class="tracker-config" data-tracker-index="2" style="border: 1px solid #ccc; padding: 10px; border-radius: 4px; margin-bottom: 10px; position: relative;">
+                <button type="button" class="remove-tracker" data-index="2" style="position: absolute; right: 5px; top: 5px; width: 24px; height: 24px; border-radius: 3px; background: #dc3545; color: white; border: none; cursor: pointer;" title="Remove this tracker">
+                  <i class="fas fa-times"></i>
+                </button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="display: block; margin-bottom: 4px;">Label:</label>
+                    <input type="text" name="label_2" value="Ship HP" style="width: 100%;">
+                  </div>
+                  <div>
+                    <label style="display: block; margin-bottom: 4px;">Icon Class:</label>
+                    <input type="text" name="icon_2" value="fa-ship" style="width: 100%;">
+                  </div>
+                  <div>
+                    <label style="display: block; margin-bottom: 4px;">Current Value:</label>
+                    <input type="number" name="value_2" value="0" style="width: 100%;">
+                  </div>
+                </div>
+              </div>
+            `;
+            
+            html.find("#trackers-list").html(defaultTrackers);
+            attachRemoveHandlers(html);
+          });
+          
+          // Function to attach remove handlers
+          const attachRemoveHandlers = (html) => {
+            html.find(".remove-tracker").off("click").on("click", (e) => {
+              $(e.currentTarget).closest('.tracker-config').remove();
+              
+              // Reindex remaining trackers
+              html.find('.tracker-config').each((index, element) => {
+                $(element).attr('data-tracker-index', index);
+                $(element).find('input').each((i, input) => {
+                  const name = $(input).attr('name');
+                  if (name) {
+                    const baseName = name.split('_')[0];
+                    $(input).attr('name', `${baseName}_${index}`);
+                  }
+                });
+                $(element).find('.remove-tracker').attr('data-index', index);
+              });
+            });
+          };
+          
+          // Attach handlers initially
+          attachRemoveHandlers(html);
+        }
+      }).render(true);
+    });
+
+    // Handle increment/decrement for dynamic trackers
     html.find("[data-action='inc'], [data-action='dec']").on("click", async ev => {
-      const btn   = ev.currentTarget;
-      const key   = btn.dataset.key;
+      const btn = ev.currentTarget;
+      const trackerIndex = parseInt(btn.dataset.index);
       const delta = btn.dataset.action === "inc" ? 1 : -1;
 
-      const state  = game.settings.get(MODULE_ID, SETTING_KEY) ?? {};
+      const state = game.settings.get(MODULE_ID, SETTING_KEY) ?? {};
       if (!game.user.isGM || (state.locked ?? false)) return;
 
-      const next = Math.max(0, Number(state[key] ?? 0) + delta);
-      await setState({ [key]: next });
+      const trackers = [...state.trackers];
+      trackers[trackerIndex].value = Math.max(0, (trackers[trackerIndex].value || 0) + delta);
+      
+      await setState({ trackers });
     });
 
-    html.find("input[data-key]").on("change", async ev => {
+    // Handle direct input changes for dynamic trackers
+    html.find("input[data-tracker-index]").on("change", async ev => {
       const inp = ev.currentTarget;
-      const key = inp.dataset.key;
+      const trackerIndex = parseInt(inp.dataset.trackerIndex);
 
       let val = Number(inp.value);
       if (!Number.isFinite(val)) val = 0;
       val = Math.max(0, Math.floor(val));
 
-      const state  = game.settings.get(MODULE_ID, SETTING_KEY) ?? {};
-      if (!game.user.isGM || (state.locked ?? false)) { inp.value = state[key] ?? 0; return; }
+      const state = game.settings.get(MODULE_ID, SETTING_KEY) ?? {};
+      if (!game.user.isGM || (state.locked ?? false)) { 
+        inp.value = state.trackers[trackerIndex].value || 0; 
+        return; 
+      }
 
-      await setState({ [key]: val });
+      const trackers = [...state.trackers];
+      trackers[trackerIndex].value = val;
+      
+      await setState({ trackers });
     });
   }
 
@@ -127,7 +381,15 @@ Hooks.once("init", () => {
     scope: "world",
     config: false,
     type: Object,
-    default: { time: 0, supply: 0, shiphp: 0, locked: false, showToPlayers: false },
+    default: { 
+      trackers: [
+        { id: "time", label: "Time", icon: "fa-sun", value: 0 },
+        { id: "supply", label: "Supply", icon: "fa-boxes", value: 0 },
+        { id: "shiphp", label: "Ship HP", icon: "fa-ship", value: 0 }
+      ],
+      locked: false, 
+      showToPlayers: false 
+    },
     onChange: () => vasTrackersApp?.render(false)
   });
   console.log("[VasTrackers] init");
@@ -200,7 +462,7 @@ Hooks.once("ready", () => {
   const mod = game.modules.get(MODULE_ID);
   if (mod) mod.api = {
     open : () => vasTrackersApp?.render(true),
-    close: () => vasTrackersApp?.close(), // Added close to API
+    close: () => vasTrackersApp?.close(),
     state: () => game.settings.get(MODULE_ID, SETTING_KEY)
   };
   console.log("[VasTrackers] ready");

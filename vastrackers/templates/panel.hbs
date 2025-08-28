@@ -5,52 +5,30 @@
         <button class="vt-show-players" data-action="toggle-show-players" title="{{#if showToPlayers}}Hide from Players{{else}}Show to Players{{/if}}">
           {{#if showToPlayers}}<i class="fas fa-eye"></i>{{else}}<i class="fas fa-eye-slash"></i>{{/if}}
         </button>
-
         <button class="vt-lock" data-action="toggle-lock" title="{{#if locked}}Unlock{{else}}Lock{{/if}}">
           {{#if locked}}<i class="fas fa-lock"></i>{{else}}<i class="fas fa-lock-open"></i>{{/if}}
+        </button>
+        <button class="vt-options" data-action="open-options" title="Options">
+          <i class="fas fa-cog"></i>
         </button>
       {{/if}}
     </div>
   </div>
 
+  {{#each trackers}}
   <div class="vt-row">
-    <label><i class="fas fa-sun"></i> Time</label>
+    <label><i class="fas {{this.icon}}"></i> {{this.label}}</label>
     <div class="vt-controls">
-      {{#if isGM}}
-        <button data-action="dec" data-key="time" {{#unless canEdit}}disabled{{/unless}}>-</button>
+      {{#if ../isGM}}
+        <button data-action="dec" data-index="{{@index}}" {{#unless ../canEdit}}disabled{{/unless}}>-</button>
       {{/if}}
-      <input type="number" data-key="time" value="{{time}}" {{#unless canEdit}}disabled{{/unless}} />
-      {{#if isGM}}
-        <button data-action="inc" data-key="time" {{#unless canEdit}}disabled{{/unless}}>+</button>
+      <input type="number" data-tracker-index="{{@index}}" value="{{this.value}}" {{#unless ../canEdit}}disabled{{/unless}} />
+      {{#if ../isGM}}
+        <button data-action="inc" data-index="{{@index}}" {{#unless ../canEdit}}disabled{{/unless}}>+</button>
       {{/if}}
     </div>
   </div>
-
-  <div class="vt-row">
-    <label><i class="fas fa-boxes"></i> Supply</label>
-    <div class="vt-controls">
-      {{#if isGM}}
-        <button data-action="dec" data-key="supply" {{#unless canEdit}}disabled{{/unless}}>-</button>
-      {{/if}}
-      <input type="number" data-key="supply" value="{{supply}}" {{#unless canEdit}}disabled{{/unless}} />
-      {{#if isGM}}
-        <button data-action="inc" data-key="supply" {{#unless canEdit}}disabled{{/unless}}>+</button>
-      {{/if}}
-    </div>
-  </div>
-
-  <div class="vt-row">
-    <label><i class="fas fa-ship"></i> Ship HP</label>
-    <div class="vt-controls">
-      {{#if isGM}}
-        <button data-action="dec" data-key="shiphp" {{#unless canEdit}}disabled{{/unless}}>-</button>
-      {{/if}}
-      <input type="number" data-key="shiphp" value="{{shiphp}}" {{#unless canEdit}}disabled{{/unless}} />
-      {{#if isGM}}
-        <button data-action="inc" data-key="shiphp" {{#unless canEdit}}disabled{{/unless}}>+</button>
-      {{/if}}
-    </div>
-  </div>
+  {{/each}}
 
   {{#if isGM}}
     {{#if locked}}
